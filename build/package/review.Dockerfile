@@ -10,25 +10,29 @@ RUN go mod download
 
 COPY ./ ./
 
-ARG VERSION=unknown
+ARG TAG=unknown
 
-RUN go build -o ./build/bin/review -ldflags="-X main.version=$VERSION"  ./cmd/review/main.go
+RUN go build -o ./build/bin/review -ldflags="-X main.version=$TAG"  ./cmd/review/main.go
 
 
 FROM alpine:3.22 AS runner
 
-RUN apk add --no-cache ca-certificates postgresql-client
+RUN apk add --no-cache ca-certificates
 
-COPY ./scripts/wait-storage.sh /wait.sh
+COPY ./configs/config.yaml /etc/review/config.yaml
 
-RUN chmod 744 /wait.sh
+ENV POSTGRES_HOST=
+ENV POSTGRES_PORT=
+ENV POSTGRES_USER=
+ENV POSTGRES_DB=
+ENV POSTGRES_PASSWORD=
+ENV POSTGRES_SSL_MODE=disable
+ENV CONFIG_PATH /etc/review/config.yaml
 
-COPY ./configs/config.yaml /config.yaml
+ENV GIN_MODE=
 
-ENV CONFIG_PATH /config.yaml
+ENV APP_VERSION=$TAG
 
-COPY --from=builder /usr/local/src/bin/apw /usr/bin/review
-
-ENV APP_VERSION=$VERSION
+COPY --from=builder /usr/local/src/build/bin/review /usr/bin/review
 
 CMD ["/usr/bin/review"]
