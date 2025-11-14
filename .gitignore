@@ -1,4 +1,3 @@
-
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -17,6 +16,8 @@ profile.cov
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+/tmp
+/logs
 
 # Go workspace file
 go.work
