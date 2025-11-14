@@ -1,0 +1,9 @@
+env: "dev"
+
+level: "debug"
+
+server:
+  address: ":8080"
+  ssl_mode: disable
+  read_timeout: 5s
+  write_timeout: 5s
