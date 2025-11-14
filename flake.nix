@@ -38,9 +38,11 @@
             pkgs.fzf
 
             pkgs.go
-            pkgs.make
+            pkgs.gnumake
             pkgs.docker-compose
             pkgs.git
+            pkgs.postgresql
+            pkgs.golangci-lint
 
             pkgs.disko
           ];
