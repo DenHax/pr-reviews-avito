@@ -1,5 +1,5 @@
 {
-  description = "A basic flake with a shell";
+  description = "PR Review Service for Avito Tech";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -43,6 +43,8 @@
             pkgs.git
             pkgs.postgresql
             pkgs.golangci-lint
+            pkgs.air
+            pkgs.go-swag
 
             pkgs.disko
           ];
