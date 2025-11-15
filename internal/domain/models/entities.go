@@ -1,0 +1,31 @@
+package models
+
+import "time"
+
+type Team struct {
+	TeamName  string    `json:"team_name" db:"team_name"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+type User struct {
+	UserID    string    `json:"user_id" db:"user_id"`
+	Username  string    `json:"username" db:"username"`
+	TeamName  string    `json:"team_name" db:"team_name"`
+	IsActive  bool      `json:"is_active" db:"is_active"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+type PullRequest struct {
+	PullRequestID   string     `json:"pull_request_id" db:"pull_request_id"`
+	PullRequestName string     `json:"pull_request_name" db:"pull_request_name"`
+	AuthorID        string     `json:"author_id" db:"author_id"`
+	Status          string     `json:"status" db:"status"`
+	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
+	MergedAt        *time.Time `json:"merged_at" db:"merged_at"`
+}
+
+type PRReviewer struct {
+	PullRequestID string    `json:"pull_request_id" db:"pull_request_id"`
+	UserID        string    `json:"user_id" db:"user_id"`
+	AssignedAt    time.Time `json:"assigned_at" db:"assigned_at"`
+}
