@@ -17,6 +17,6 @@ echo "Сборка Docker образа с версией: $TAG"
 docker buildx build \
   --tag "$REPOSITORY_NAME:$TAG" \
   --build-arg TAG="$TAG" \
-  --file build/package/Dockerfile .
+  --file build/package/review.Dockerfile .
 
 echo "Docker образ успешно собран: $REPOSITORY_NAME:$TAG"
