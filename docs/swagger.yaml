@@ -1,13 +1,152 @@
 basePath: /
 definitions:
-  handler.HealthResponse:
+  handler.ErrorDetail:
     properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/handler.ErrorDetail'
+    type: object
+  models.CreatePRRequest:
+    properties:
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+    required:
+    - author_id
+    - pull_request_id
+    - pull_request_name
+    type: object
+  models.MergePRRequest:
+    properties:
+      pull_request_id:
+        type: string
+    required:
+    - pull_request_id
+    type: object
+  models.PRResponse:
+    properties:
+      pr:
+        $ref: '#/definitions/models.PullRequest'
+    type: object
+  models.PullRequest:
+    properties:
+      author_id:
+        type: string
+      created_at:
+        type: string
+      merged_at:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
       status:
         type: string
-      timestamp:
-        type: integer
-      uptime:
+    type: object
+  models.PullRequestShort:
+    properties:
+      author_id:
         type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  models.ReassignRequest:
+    properties:
+      old_user_id:
+        type: string
+      pull_request_id:
+        type: string
+    required:
+    - old_user_id
+    - pull_request_id
+    type: object
+  models.ReassignResponse:
+    properties:
+      pr:
+        $ref: '#/definitions/models.PullRequest'
+      replaced_by:
+        type: string
+    type: object
+  models.ReviewListResponse:
+    properties:
+      pull_requests:
+        items:
+          $ref: '#/definitions/models.PullRequestShort'
+        type: array
+      user_id:
+        type: string
+    type: object
+  models.SetActiveRequest:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+    required:
+    - user_id
+    type: object
+  models.TeamMember:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+      username:
+        type: string
+    required:
+    - user_id
+    - username
+    type: object
+  models.TeamRequest:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/models.TeamMember'
+        minItems: 1
+        type: array
+      team_name:
+        type: string
+    required:
+    - members
+    - team_name
+    type: object
+  models.TeamResponse:
+    properties:
+      team:
+        $ref: '#/definitions/models.TeamRequest'
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      is_active:
+        type: boolean
+      team_name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserResponse:
+    properties:
+      user:
+        $ref: '#/definitions/models.User'
     type: object
 host: localhost:8080
 info:
@@ -16,6 +155,39 @@ info:
   title: API Documentation for the PR Reviews Service for Avito Tech
   version: "1.0"
 paths:
+  /getReview:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all pull request reviews assigned to a user
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ReviewListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get user reviews
+      tags:
+      - reviews
   /health:
     get:
       consumes:
@@ -27,42 +199,212 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.HealthResponse'
+            additionalProperties: true
+            type: object
       summary: Health check
       tags:
       - health
-  /health/live:
-    get:
+  /pullRequest/create:
+    post:
       consumes:
       - application/json
-      description: Kubernetes liveness probe
+      description: Create a new pull request with the specified details
+      parameters:
+      - description: Pull request creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePRRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.PRResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create a pull request
+      tags:
+      - pull-requests
+  /pullRequest/merge:
+    post:
+      consumes:
+      - application/json
+      description: Merge an existing pull request by its ID
+      parameters:
+      - description: Pull request merge data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.MergePRRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Liveness probe
+            $ref: '#/definitions/models.PRResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Merge a pull request
       tags:
-      - health
-  /health/ready:
-    get:
+      - pull-requests
+  /pullRequest/reassign:
+    post:
       consumes:
       - application/json
-      description: Kubernetes readiness probe
+      description: Reassign a reviewer from a pull request to another team member
+      parameters:
+      - description: Reassignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReassignRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Readiness probe
+            $ref: '#/definitions/models.ReassignResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Reassign a reviewer
       tags:
-      - health
+      - pull-requests
+  /team/add:
+    post:
+      consumes:
+      - application/json
+      description: Create a new team with the specified name and members
+      parameters:
+      - description: Team creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.TeamRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.TeamResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create a new team
+      tags:
+      - teams
+  /team/get:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve team details by team name
+      parameters:
+      - description: Team name
+        in: query
+        name: team_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TeamResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get team information
+      tags:
+      - teams
+  /users/setIsActive:
+    post:
+      consumes:
+      - application/json
+      description: Set or update the active status of a user
+      parameters:
+      - description: User active status data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SetActiveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Update user active status
+      tags:
+      - users
 swagger: "2.0"
