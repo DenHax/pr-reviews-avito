@@ -20,11 +20,11 @@ services:
     networks:
       review-postgres-net:
     env_file:
-      - ./.env
+      - ../../.env
 
   migrate:
     image: "migrate/migrate"
-    container_name: "iteam-migrate"
+    container_name: "review-migrate"
     restart: "on-failure:3"
     depends_on:
       postgres:
@@ -39,9 +39,11 @@ services:
       - "${MIGRATIONS_DIR}:/migrations"
     networks:
       review-postgres-net:
+    env_file:
+      - ../../.env
 
   go-backend:
-    image: "denhax/review-api:0.1"
+    image: "denhax/review-api:v0.1"
     container_name: "review-api"
     depends_on:
       postgres:
@@ -51,17 +53,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - "POSTGRES_HOST=postgres"
-      - "POSTGRES_USER=${POSTGRES_USER}"
-      - "POSTGRES_DB=${POSTGRES_DB}"
-      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
-      - "POSTGRES_PORT=5432"
-      - "POSTGRES_SSL_MODE=disable"
+      - "POSTGRES_URL=${POSTGRES_URL}"
       - "GIN_MODE=debug"
     restart: on-failure:3
     networks:
       review-postgres-net:
       review-net:
+    env_file:
+      - ../../.env
 
 networks:
   review-postgres-net:
