@@ -31,11 +31,25 @@ func (h *Handler) Init() *gin.Engine {
 	router.GET("/swagger", h.redirectToSwagger)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	health := router.Group("/health")
+	router.GET("/health", h.CheckHealth)
+
+	teamGroup := router.Group("/team")
 	{
-		health.GET("", h.healthCheck)
-		health.GET("/live", h.liveness)
-		health.GET("/ready", h.readiness)
+		teamGroup.POST("/add", h.AddTeam)
+		teamGroup.GET("/get", h.GetTeam)
+	}
+
+	usersGroup := router.Group("/users")
+	{
+		usersGroup.POST("/setIsActive", h.SetIsActive)
+		usersGroup.GET("/getReview", h.GetReview)
+	}
+
+	pullRequestGroup := router.Group("/pullRequest")
+	{
+		pullRequestGroup.POST("/create", h.CreatePR)
+		pullRequestGroup.POST("/merge", h.MergePR)
+		pullRequestGroup.POST("/reassign", h.Reassign)
 	}
 
 	return router
