@@ -74,7 +74,7 @@ func (h *Handler) SetIsActive(c *gin.Context) {
 // GetReview godoc
 // @Summary Get user reviews
 // @Description Retrieve all pull request reviews assigned to a user
-// @Tags reviews
+// @Tags users
 // @Accept json
 // @Produce json
 // @Param user_id query string true "User ID"
