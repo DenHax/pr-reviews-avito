@@ -82,7 +82,7 @@ func (h *Handler) SetIsActive(c *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
-// @Router /getReview [get]
+// @Router /users/getReview [get]
 func (h *Handler) GetReview(c *gin.Context) {
 	userID := c.Query("user_id")
 	if userID == "" {
