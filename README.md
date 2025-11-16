@@ -6,10 +6,17 @@
 
 Для начала работы необходимо иметь хотя бы `Docker`. В данном проекте использовался `Docker 28.5.1`
 
-Файл `compose.yaml` расположен в `/deploy/compose`, файл переменных окружения находится в `/`
+```sh
+cp ./.env.dist ./.env
+docker compose up
+```
+
+Файл `compose.yaml` должен быть расположен в `/deploy/compose`, файл переменных окружения находится в `/`, и относительно этого расположения `migrations` находятся не в `./migrations`, а в `./../../migrations`, так что в идеале оно должно выглядеть так:
 
 ```sh
 cp ./.env.dist ./.env
+sed -i 's|MIGRATIONS_DIR=\./migrations/|MIGRATIONS_DIR=./../../migrations|' .env
+source .env
 docker compose -f ./deploy/compose/compose.yaml up --force-recreate
 ```
 

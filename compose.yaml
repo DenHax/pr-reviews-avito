@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: postgres:17.7
+    container_name: "review-storage"
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - "review-storage:/var/lib/postgresql/data"
+    environment:
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    ports:
+      - "${POSTGRES_EXTERNAL_PORT}:5432"
+    networks:
+      review-postgres-net:
+    env_file:
+      - ./.env
+
+  migrate:
+    image: "migrate/migrate"
+    container_name: "review-migrate"
+    restart: "on-failure:3"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      - "up"
+    volumes:
+      - "${MIGRATIONS_DIR}:/migrations"
+    networks:
+      review-postgres-net:
+    env_file:
+      - ./.env
+
+  go-backend:
+    image: "denhax/review-api:v0.3"
+    container_name: "review-api"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    environment:
+      - "POSTGRES_URL=${POSTGRES_URL}"
+      - "GIN_MODE=debug"
+    restart: on-failure:3
+    networks:
+      review-postgres-net:
+      review-net:
+    env_file:
+      - ./.env
+
+networks:
+  review-postgres-net:
+  review-net:
+
+volumes:
+  review-storage:
