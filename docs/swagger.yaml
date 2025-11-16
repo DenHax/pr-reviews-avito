@@ -155,39 +155,6 @@ info:
   title: API Documentation for the PR Reviews Service for Avito Tech
   version: "1.0"
 paths:
-  /getReview:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all pull request reviews assigned to a user
-      parameters:
-      - description: User ID
-        in: query
-        name: user_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ReviewListResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-      summary: Get user reviews
-      tags:
-      - reviews
   /health:
     get:
       consumes:
@@ -373,6 +340,39 @@ paths:
       summary: Get team information
       tags:
       - teams
+  /users/getReview:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all pull request reviews assigned to a user
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ReviewListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get user reviews
+      tags:
+      - reviews
   /users/setIsActive:
     post:
       consumes:
