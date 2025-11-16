@@ -124,12 +124,19 @@ func (s *PRService) ReassignReviewer(req models.ReassignRequest) (*models.PullRe
 		return nil, "", err
 	}
 
+	filteredCandidates := make([]models.User, 0, len(candidates))
+	for _, candidate := range candidates {
+		if candidate.UserID != pr.AuthorID {
+			filteredCandidates = append(filteredCandidates, candidate)
+		}
+	}
+
 	currentReviewers, err := s.repo.GetPRReviewers(req.PullRequestID)
 	if err != nil {
 		return nil, "", err
 	}
 
-	availableCandidates := s.filterExistingReviewers(candidates, currentReviewers)
+	availableCandidates := s.filterExistingReviewers(filteredCandidates, currentReviewers)
 
 	if len(availableCandidates) == 0 {
 		return nil, "", errors.New("no active replacement candidate in team")
