@@ -43,7 +43,7 @@ services:
       - ../../.env
 
   go-backend:
-    image: "denhax/review-api:v0.1"
+    image: "denhax/review-api:v0.2"
     container_name: "review-api"
     depends_on:
       postgres:
